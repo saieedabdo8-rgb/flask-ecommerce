@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}لوحة التحكم{% endblock %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">لوحة التحكم</h1>
+    <div class="flex items-center gap-3">
+      <span class="text-gray-500 text-sm">مرحباً، {{ current_user.username }}</span>
+      <a href="{{ url_for('admin_logout') }}"
+         class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600 transition font-medium">تسجيل الخروج</a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <p class="text-gray-500 text-sm">إجمالي المنتجات</p>
+      <p class="text-3xl font-bold text-gray-900">{{ products|length }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <p class="text-gray-500 text-sm">إجمالي الطلبات</p>
+      <p class="text-3xl font-bold text-gray-900">{{ orders|length }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <p class="text-gray-500 text-sm">الطلبات المعلقة</p>
+      <p class="text-3xl font-bold text-yellow-500">{{ orders|selectattr('status','equalto','قيد المراجعة')|list|length }}</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-900">إدارة المنتجات</h2>
+    </div>
+
+    <form action="{{ url_for('add_product') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 p-4 bg-gray-50 rounded-xl">
+      <input type="text" name="title" placeholder="اسم المنتج *" required
+             class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm">
+      <input type="number" step="0.01" name="price" placeholder="السعر *" required dir="ltr"
+             class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm">
+      <input type="text" name="image_url" placeholder="رابط الصورة"
+             class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm">
+      <input type="text" name="description" placeholder="وصف مختصر"
+             class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm">
+      <button type="submit"
+              class="bg-primary-600 text-white py-2 rounded-lg hover:bg-primary-700 transition font-medium text-sm">إضافة</button>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b bg-gray-50">
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">#</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">الصورة</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">الاسم</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">السعر</th>
+            <th class="text-left px-3 py-3 font-semibold text-gray-600">إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-3 py-3 text-gray-500">{{ product.id }}</td>
+            <td class="px-3 py-3">
+              <img src="{{ product.image_url or 'https://placehold.co/40x40/e2e8f0/64748b?text=N' }}"
+                   alt="" class="w-10 h-10 rounded-lg object-cover">
+            </td>
+            <td class="px-3 py-3 font-medium">{{ product.title }}</td>
+            <td class="px-3 py-3 font-bold text-primary-600">{{ product.price }} ج.م</td>
+            <td class="px-3 py-3">
+              <div class="flex items-center gap-2 justify-left">
+                <button onclick="openEdit({{ product.id }}, '{{ product.title }}', {{ product.price }}, '{{ product.description or '' }}', '{{ product.image_url or '' }}')"
+                        class="text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg text-sm transition font-medium">تعديل</button>
+                <form action="{{ url_for('delete_product', product_id=product.id) }}" method="POST" class="inline"
+                      onsubmit="return confirm('حذف هذا المنتج؟')">
+                  <button type="submit" class="text-red-600 hover:bg-red-50 px-3 py-1 rounded-lg text-sm transition font-medium">حذف</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not products %}
+          <tr><td colspan="5" class="text-center py-8 text-gray-400">لا توجد منتجات</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h2 class="text-xl font-bold text-gray-900 mb-4">الطلبات ({{ orders|length }})</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b bg-gray-50">
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">#</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">العميل</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">الهاتف</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">المنتج</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">السعر</th>
+            <th class="text-right px-3 py-3 font-semibold text-gray-600">التاريخ</th>
+            <th class="text-left px-3 py-3 font-semibold text-gray-600">إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-3 py-3 text-gray-500">{{ order.id }}</td>
+            <td class="px-3 py-3">
+              <p class="font-medium">{{ order.customer_name }}</p>
+              <p class="text-xs text-gray-400">{{ order.customer_address[:30] }}{% if order.customer_address|length > 30 %}...{% endif %}</p>
+            </td>
+            <td class="px-3 py-3" dir="ltr">{{ order.customer_phone }}</td>
+            <td class="px-3 py-3">
+              <a href="{{ url_for('product_detail', product_id=order.product.id) }}" class="text-primary-600 hover:underline">{{ order.product.title }}</a>
+            </td>
+            <td class="px-3 py-3 font-bold">{{ order.product.price }} ج.م</td>
+            <td class="px-3 py-3 text-gray-500 text-xs">{{ order.created_at.strftime('%Y-%m-%d') if order.created_at else '—' }}</td>
+            <td class="px-3 py-3">
+              <div class="flex items-center gap-2 justify-left">
+                <span class="px-2 py-1 rounded text-xs font-medium
+                  {% if order.status == 'تم التسليم' %}bg-green-100 text-green-700
+                  {% elif order.status == 'تم الشحن' %}bg-blue-100 text-blue-700
+                  {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                  {{ order.status }}
+                </span>
+                <form action="{{ url_for('delete_order', order_id=order.id) }}" method="POST" class="inline"
+                      onsubmit="return confirm('حذف هذا الطلب؟')">
+                  <button type="submit" class="text-red-600 hover:bg-red-50 px-2 py-1 rounded text-xs transition">حذف</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not orders %}
+          <tr><td colspan="7" class="text-center py-8 text-gray-400">لا توجد طلبات</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="editModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center px-4">
+  <div class="bg-white rounded-2xl w-full max-w-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold">تعديل المنتج</h3>
+      <button onclick="closeEdit()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+    </div>
+    <form method="POST" id="editForm" class="space-y-4">
+      <input type="text" name="title" id="editTitle" required
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+             placeholder="اسم المنتج">
+      <input type="number" step="0.01" name="price" id="editPrice" required dir="ltr"
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+             placeholder="السعر">
+      <input type="text" name="image_url" id="editImage"
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+             placeholder="رابط الصورة">
+      <textarea name="description" id="editDesc" rows="3"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                placeholder="وصف المنتج"></textarea>
+      <button type="submit"
+              class="w-full bg-primary-600 text-white py-3 rounded-lg font-bold hover:bg-primary-700 transition">حفظ التعديلات</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEdit(id, title, price, desc, image) {
+  const form = document.getElementById('editForm');
+  form.action = '/admin/products/edit/' + id;
+  document.getElementById('editTitle').value = title;
+  document.getElementById('editPrice').value = price;
+  document.getElementById('editDesc').value = desc;
+  document.getElementById('editImage').value = image;
+  document.getElementById('editModal').classList.remove('hidden');
+  document.getElementById('editModal').classList.add('flex');
+}
+function closeEdit() {
+  document.getElementById('editModal').classList.add('hidden');
+  document.getElementById('editModal').classList.remove('flex');
+}
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEdit();
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}متجري - المتجر الإلكتروني{% endblock %}
+{% block content %}
+
+<section class="bg-gradient-to-br from-primary-600 to-primary-800 text-white py-20">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-4">تسوق بأفضل الأسعار</h1>
+    <p class="text-primary-100 text-lg max-w-2xl mx-auto mb-8">اكتشف تشكيلتنا المميزة من المنتجات. جودة عالية، أسعار منافسة، توصيل سريع.</p>
+    <a href="#products" class="inline-block bg-white text-primary-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow-lg">تصفح المنتجات</a>
+  </div>
+</section>
+
+<section id="products" class="max-w-7xl mx-auto px-4 py-16">
+  <h2 class="text-3xl font-bold text-center mb-12 text-gray-900 relative after:content-[''] after:block after:w-16 after:h-1 after:bg-primary-500 after:mx-auto after:mt-3 after:rounded">منتجاتنا</h2>
+
+  {% if products %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {% for product in products %}
+        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+          <a href="{{ url_for('product_detail', product_id=product.id) }}" class="block">
+            <div class="aspect-square overflow-hidden bg-gray-100">
+              <img src="{{ product.image_url or 'https://placehold.co/400x400/e2e8f0/64748b?text=No+Image' }}"
+                   alt="{{ product.title }}"
+                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                   loading="lazy">
+            </div>
+          </a>
+          <div class="p-4">
+            <a href="{{ url_for('product_detail', product_id=product.id) }}">
+              <h3 class="font-bold text-gray-800 mb-2 line-clamp-2 hover:text-primary-600 transition">{{ product.title }}</h3>
+            </a>
+            <p class="text-2xl font-bold text-primary-600 mb-3">{{ product.price }} ج.م</p>
+            <a href="{{ url_for('product_detail', product_id=product.id) }}"
+               class="block w-full text-center bg-primary-600 text-white py-2.5 rounded-lg hover:bg-primary-700 transition font-medium active:scale-95">
+              اطلب الآن
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-20">
+      <p class="text-6xl mb-4">📦</p>
+      <p class="text-xl text-gray-500">لا توجد منتجات حالياً</p>
+    </div>
+  {% endif %}
+</section>
+
+<section class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      <div class="p-6">
+        <p class="text-4xl mb-3">🚚</p>
+        <h3 class="text-lg font-bold mb-2">شحن سريع</h3>
+        <p class="text-gray-500">توصيل لجميع المحافظات في أسرع وقت</p>
+      </div>
+      <div class="p-6">
+        <p class="text-4xl mb-3">✅</p>
+        <h3 class="text-lg font-bold mb-2">جودة مضمونة</h3>
+        <p class="text-gray-500">منتجات أصلية بضمان كامل</p>
+      </div>
+      <div class="p-6">
+        <p class="text-4xl mb-3">💳</p>
+        <h3 class="text-lg font-bold mb-2">دفع آمن</h3>
+        <p class="text-gray-500">طرق دفع متعددة ومأمونة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
