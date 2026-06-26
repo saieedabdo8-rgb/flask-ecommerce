@@ -3,14 +3,19 @@ from app import app, db, Admin
 
 with app.app_context():
     admin = Admin.query.filter_by(username='admin').first()
+    if not admin:
+        admin = Admin.query.filter_by(username='abdosaieed').first()
+
     if admin:
+        admin.username = 'abdosaieed'
         admin.set_password('saieedabdo')
         db.session.commit()
-        print('✅ Password changed to: saieedabdo')
+        print('✅ Username changed to: abdosaieed')
+        print('✅ Password: saieedabdo')
     else:
-        print('Admin not found. Creating new admin...')
-        admin = Admin(username='admin')
+        admin = Admin(username='abdosaieed')
         admin.set_password('saieedabdo')
         db.session.add(admin)
         db.session.commit()
-        print('✅ Admin created with password: saieedabdo')
+        print('✅ Admin created with username: abdosaieed')
+        print('✅ Password: saieedabdo')
