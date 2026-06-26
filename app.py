@@ -26,11 +26,11 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
-    admin = Admin.query.filter_by(username='admin').first()
+    admin = Admin.query.first()
     if admin:
         admin.username = 'Abdelrhman'
         admin.set_password('saieedabdo')
-    elif not Admin.query.first():
+    else:
         admin = Admin(username='Abdelrhman')
         admin.set_password('saieedabdo')
         db.session.add(admin)
