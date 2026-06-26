@@ -10,12 +10,10 @@ with app.app_context():
         admin.username = 'abdosaieed'
         admin.set_password('saieedabdo')
         db.session.commit()
-        print('✅ Username changed to: abdosaieed')
-        print('✅ Password: saieedabdo')
+        print('✅ Updated: abdosaieed / saieedabdo')
     else:
         admin = Admin(username='abdosaieed')
         admin.set_password('saieedabdo')
         db.session.add(admin)
         db.session.commit()
-        print('✅ Admin created with username: abdosaieed')
-        print('✅ Password: saieedabdo')
+        print('✅ Created: abdosaieed / saieedabdo')

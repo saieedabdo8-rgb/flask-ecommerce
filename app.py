@@ -26,11 +26,15 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
-    if not Admin.query.first():
+    admin = Admin.query.filter_by(username='admin').first()
+    if admin:
+        admin.username = 'abdosaieed'
+        admin.set_password('saieedabdo')
+    elif not Admin.query.first():
         admin = Admin(username='abdosaieed')
         admin.set_password('saieedabdo')
         db.session.add(admin)
-        db.session.commit()
+    db.session.commit()
 
 
 @app.route('/')
