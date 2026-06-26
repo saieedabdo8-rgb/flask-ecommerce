@@ -28,7 +28,7 @@ with app.app_context():
     db.create_all()
     if not Admin.query.first():
         admin = Admin(username='admin')
-        admin.set_password('admin123')
+        admin.set_password('saieedabdo')
         db.session.add(admin)
         db.session.commit()
 
